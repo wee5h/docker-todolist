@@ -1,0 +1,6 @@
+flask
+flask-sqlalchemy
+pymysql
+cryptography
+PyMySQL[rsa]
+flask-cors

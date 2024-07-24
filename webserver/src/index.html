@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c62828;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List</h1>
+
+    <div class="form-container">
+        <input type="text" id="task-input" placeholder="Enter a new task">
+        <button onclick="addTodo()">Add Task</button>
+    </div>
+
+    <table id="todo-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Task</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="todo-list">
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <script>
+        const apiUrl = 'http://localhost:5000/todos';  // Replace with your API endpoint
+
+        function fetchTodos() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(todos => {
+                    const todoList = document.getElementById('todo-list');
+                    todoList.innerHTML = '';  // Clear existing rows
+                    todos.forEach(todo => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${todo.id}</td>
+                            <td>${todo.task}</td>
+                            <td><button onclick="deleteTodo(${todo.id})">Delete</button></td>
+                        `;
+                        todoList.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching todos:', error));
+        }
+
+        function deleteTodo(id) {
+            fetch(`${apiUrl}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})  // You might want to include additional data here if needed
+            })
+            .then(response => {
+                if (response.ok) {
+                    fetchTodos();
+                } else {
+                    console.error('Error deleting todo:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error deleting todo:', error));
+        
+        }
+
+        function addTodo() {
+            const taskInput = document.getElementById('task-input');
+            const task = taskInput.value.trim();
+            if (task) {
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ task: task })
+                })
+                .then(response => response.json())
+                .then(newTodo => {
+                    // Add the new todo to the table
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${newTodo.id}</td>
+                        <td>${newTodo.task}</td>
+                        <td><button onclick="deleteTodo(${newTodo.id})">Delete</button></td>
+                    `;
+                    document.getElementById('todo-list').appendChild(row);
+                    taskInput.value = '';  // Clear the input field
+                })
+                .catch(error => console.error('Error adding todo:', error));
+            }
+        }
+
+        // Fetch todos on page load
+        window.onload = fetchTodos;
+    </script>
+</body>
+</html>
+

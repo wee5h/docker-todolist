@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  web:
+    container_name: web
+    build:
+      context: ./webserver/
+    depends_on:
+      - db
+      - api
+    ports:
+      - "8080:80"
+  api:
+    container_name: api
+    build:
+      context: ./apiserver/img
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      MYSQL_USER: weesh
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: todo_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./apiserver/app.py:/api/app.py:ro
+    stdin_open: true
+    tty: true
+  db:
+    container_name: db
+    image: mysql
+    environment:
+      MYSQL_USER: weesh
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: todo_db
+      MYSQL_ROOT_PASSWORD: password
+    #ports:
+      #- "3306:3306"
+    volumes:
+      - ./sqlserver/data:/var/lib/mysql
+      - ./sqlserver/init:/docker-entrypoint-initdb.d/:ro #ro means read only, /docker-entrypoint-initdb.d/ is the entry point 
