@@ -1,3 +1,6 @@
 /testing_image
 /sqlserver/data/*
 /apiserver/__pycache__
+.DS_Store
+
+!/sqlserver/data
